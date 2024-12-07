@@ -3,23 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_client_list">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.example.tp3.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_client_list"
+        android:name="com.example.tp3.ClientListFragment"
+        android:label="Client List"
+        tools:layout="@layout/fragment_client_list" />
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.example.tp3.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_map"
+        android:name="com.example.tp3.MapFragment"
+        android:label="Map"
+        tools:layout="@layout/fragment_client_map" />
 
-    <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.example.tp3.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
 </navigation>

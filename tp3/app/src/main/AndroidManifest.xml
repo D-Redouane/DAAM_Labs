@@ -28,6 +28,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".MapActivity"
+            android:exported="false"
+            android:label="Map"
+            android:theme="@style/Theme.Tp3.NoActionBar" />
+
     </application>
 
 </manifest>
