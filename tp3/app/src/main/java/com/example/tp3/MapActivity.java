@@ -30,8 +30,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         setContentView(R.layout.activity_map);
 
         // Retrieve latitude and longitude of the client
-        double clientLat = getIntent().getDoubleExtra("client_lat", 0.0);
-        double clientLon = getIntent().getDoubleExtra("client_lon", 0.0);
+        double clientLat = getIntent().getDoubleExtra("client_lat", 43.910254);
+        double clientLon = getIntent().getDoubleExtra("client_lon", 4.888752);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -54,6 +54,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
 
         mMap.setMyLocationEnabled(true);
+        mMap.setOnMapLongClickListener(latLng -> {
+            // Add a marker at the clicked location
+            mMap.addMarker(new MarkerOptions().position(latLng).title("New Location"));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+        });
         fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
             if (location != null) {
                 LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());

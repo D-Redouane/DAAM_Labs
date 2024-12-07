@@ -146,8 +146,8 @@ public class ClientListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         List<Client> clients = new ArrayList<>();
-        clients.add(new Client("Client 1", "Description 1", R.drawable.sample_image, 36.7525, 3.04197)); // Example client
-        clients.add(new Client("Client 2", "Description 2", R.drawable.sample_image, 36.7525, 3.04197)); // Example client
+        clients.add(new Client("Université Constantine 2", "Université Constantine 2 Abdelhamid Mehri – Nouvelle ville Ali Mendjeli BP : 67A, Constantine – Algérie La Nouvelle Ville Ali Mendjeli, 25016", R.drawable.sample_image, 36.246579, 6.569953));
+        clients.add(new Client("Université D'Avignon", "339 Chem. des Meinajaries, 84000 Avignon, France", R.drawable.sample_image, 43.910254, 4.888752)); // Example client
 
         ClientAdapter adapter = new ClientAdapter(getContext(), clients);
         recyclerView.setAdapter(adapter);
@@ -349,8 +349,6 @@ public class MapFragment extends Fragment {
         return view;
     }
 }
-
-
 
 
 
@@ -585,7 +583,7 @@ public class MapFragment extends Fragment {
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginStart="8dp"
-        android:src="@drawable/ic_arrow" />
+        android:src="@drawable/ic_sample_location" />
 </LinearLayout>
 
 
@@ -687,9 +685,9 @@ public class MapFragment extends Fragment {
 // main\res\mipmap-anydpi-v26\ic_launcher.xml
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
-    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+    <background android:drawable="@drawable/ic_map_logo" />
+    <foreground android:drawable="@drawable/ic_map_logo" />
+    <monochrome android:drawable="@drawable/ic_map_logo" />
 </adaptive-icon>
 
 
@@ -701,9 +699,9 @@ public class MapFragment extends Fragment {
 // main\res\mipmap-anydpi-v26\ic_launcher_round.xml
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@drawable/ic_launcher_background" />
-    <foreground android:drawable="@drawable/ic_launcher_foreground" />
-    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+    <background android:drawable="@drawable/ic_map_logo" />
+    <foreground android:drawable="@drawable/ic_map_logo" />
+    <monochrome android:drawable="@drawable/ic_map_logo" />
 </adaptive-icon>
 
 
@@ -748,72 +746,6 @@ public class MapFragment extends Fragment {
 
 
 
-
-
-
-
-
-
-
-// main\res\values\colors.xml
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-</resources>
-
-
-
-
-
-
-
-// main\res\values\dimens.xml
-<resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="nav_header_vertical_spacing">8dp</dimen>
-    <dimen name="nav_header_height">200dp</dimen>
-    <dimen name="fab_margin">16dp</dimen>
-</resources>
-
-
-
-
-
-
-
-
-// main\res\values\refs.xml
-<?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
-
-
-
-
-
-
-
-// main\res\values\strings.xml
-<resources>
-    <string name="app_name">tp3</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">DADDIOUAMER Redouane</string>
-    <string name="nav_header_subtitle">redouane.daddiouamer@univ-constantine2.dz</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
-
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-</resources>
 
 
 
