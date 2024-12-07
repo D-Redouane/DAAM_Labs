@@ -1,24 +1,39 @@
 package com.example.tp3;
 
 public class Client {
-    private String name;
-    private String image; // Can use a URL or drawable resource ID
-    private String category;
-    private double latitude;
-    private double longitude;
+    private final String name; // Client's name
+    private final String description; // Brief description of the location
+    private final int imageResId; // Resource ID for the client's image
+    private final double latitude; // Latitude of the client's location
+    private final double longitude; // Longitude of the client's location
 
-    public Client(String name, String image, String category, double latitude, double longitude) {
+    // Constructor to initialize the Client object
+    public Client(String name, String description, int imageResId, double latitude, double longitude) {
         this.name = name;
-        this.image = image;
-        this.category = category;
+        this.description = description;
+        this.imageResId = imageResId;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    // Getters and Setters
-    public String getName() { return name; }
-    public String getImage() { return image; }
-    public String getCategory() { return category; }
-    public double getLatitude() { return latitude; }
-    public double getLongitude() { return longitude; }
+    // Getters for accessing the properties
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getImageResId() {
+        return imageResId;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
 }

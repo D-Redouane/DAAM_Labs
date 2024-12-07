@@ -1,40 +1,118 @@
-
-
-undefined
-
-
-
-
-
-
-
-
-
 // main\java\com\example\tp3\Client.java
 package com.example.tp3;
 
 public class Client {
-    private String name;
-    private String image; // Can use a URL or drawable resource ID
-    private String category;
-    private double latitude;
-    private double longitude;
+    private final String name; // Client's name
+    private final String description; // Brief description of the location
+    private final int imageResId; // Resource ID for the client's image
+    private final double latitude; // Latitude of the client's location
+    private final double longitude; // Longitude of the client's location
 
-    public Client(String name, String image, String category, double latitude, double longitude) {
+    // Constructor to initialize the Client object
+    public Client(String name, String description, int imageResId, double latitude, double longitude) {
         this.name = name;
-        this.image = image;
-        this.category = category;
+        this.description = description;
+        this.imageResId = imageResId;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    // Getters and Setters
-    public String getName() { return name; }
-    public String getImage() { return image; }
-    public String getCategory() { return category; }
-    public double getLatitude() { return latitude; }
-    public double getLongitude() { return longitude; }
+    // Getters for accessing the properties
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getImageResId() {
+        return imageResId;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
 }
+
+
+
+
+
+
+
+
+// main\java\com\example\tp3\ClientAdapter.java
+package com.example.tp3;
+
+import android.content.Context;
+import android.content.Intent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.List;
+
+public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientViewHolder> {
+
+    private final List<Client> clients;
+    private final Context context;
+
+    public ClientAdapter(Context context, List<Client> clients) {
+        this.context = context;
+        this.clients = clients;
+    }
+
+    @NonNull
+    @Override
+    public ClientViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client, parent, false);
+        return new ClientViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ClientViewHolder holder, int position) {
+        Client client = clients.get(position);
+        holder.name.setText(client.getName());
+        holder.description.setText(client.getDescription());
+        holder.image.setImageResource(client.getImageResId()); // Assuming image is from drawable
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, MapActivity.class);
+            intent.putExtra("client_lat", client.getLatitude());
+            intent.putExtra("client_lon", client.getLongitude());
+            context.startActivity(intent);
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return clients.size();
+    }
+
+    public static class ClientViewHolder extends RecyclerView.ViewHolder {
+        ImageView image;
+        TextView name, description;
+        ImageView icon;
+
+        public ClientViewHolder(@NonNull View itemView) {
+            super(itemView);
+            image = itemView.findViewById(R.id.client_image);
+            name = itemView.findViewById(R.id.client_name);
+            description = itemView.findViewById(R.id.client_description);
+            icon = itemView.findViewById(R.id.client_icon);
+        }
+    }
+}
+
 
 
 
@@ -46,46 +124,33 @@ public class Client {
 // main\java\com\example\tp3\ClientListFragment.java
 package com.example.tp3;
 
-import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import com.example.tp3.MapActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClientListFragment extends Fragment {
 
-    private List<Client> clientList;
-
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_client_list, container, false);
 
-        // Initialize sample client data
-        clientList = new ArrayList<>();
-        clientList.add(new Client("Client 1", "image1.jpg", "Category 1", 36.778259, -119.417931));
-        clientList.add(new Client("Client 2", "image2.jpg", "Category 2", 40.712776, -74.005974));
+        RecyclerView recyclerView = view.findViewById(R.id.client_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        ListView listView = view.findViewById(R.id.client_list_view);
-        ArrayAdapter<Client> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, clientList);
-        listView.setAdapter(adapter);
+        List<Client> clients = new ArrayList<>();
+        clients.add(new Client("Client 1", "Description 1", R.drawable.sample_image, 36.7525, 3.04197)); // Example client
+        clients.add(new Client("Client 2", "Description 2", R.drawable.sample_image, 36.7525, 3.04197)); // Example client
 
-        // Handle item clicks
-        listView.setOnItemClickListener((parent, view1, position, id) -> {
-            Intent intent = new Intent(getActivity(), MapActivity.class);
-            intent.putExtra("latitude", clientList.get(position).getLatitude());
-            intent.putExtra("longitude", clientList.get(position).getLongitude());
-            startActivity(intent);
-        });
+        ClientAdapter adapter = new ClientAdapter(getContext(), clients);
+        recyclerView.setAdapter(adapter);
 
         return view;
     }
@@ -128,10 +193,14 @@ public class MainActivity extends AppCompatActivity {
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
 
+        // mAppBarConfiguration = new AppBarConfiguration.Builder(
+        //         R.id.nav_client_list, R.id.nav_map)
+        //         .setOpenableLayout(drawer)
+        //         .build();
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_client_list, R.id.nav_map)
-                .setOpenableLayout(drawer)
-                .build();
+            R.id.nav_client_list, R.id.nav_map
+        ).setOpenableLayout(binding.drawerLayout).build();
+
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -156,32 +225,91 @@ public class MainActivity extends AppCompatActivity {
 // main\java\com\example\tp3\MapActivity.java
 package com.example.tp3;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class MapActivity extends AppCompatActivity {
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+
+public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
+
+    private GoogleMap mMap;
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-        // Retrieve latitude and longitude from Intent
-        double latitude = getIntent().getDoubleExtra("latitude", 0.0);
-        double longitude = getIntent().getDoubleExtra("longitude", 0.0);
+        // Retrieve latitude and longitude of the client
+        double clientLat = getIntent().getDoubleExtra("client_lat", 0.0);
+        double clientLon = getIntent().getDoubleExtra("client_lon", 0.0);
 
-        // Configure WebView to display the map
-        WebView webView = findViewById(R.id.map_webview);
-        webView.setWebViewClient(new WebViewClient());
-        webView.getSettings().setJavaScriptEnabled(true);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        String url = "https://www.google.com/maps/dir/?api=1&destination=" + latitude + "," + longitude;
-        webView.loadUrl(url);
+        // Initialize map fragment
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        mMap = googleMap;
+
+        // Request user location
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            return;
+        }
+
+        mMap.setMyLocationEnabled(true);
+        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                LatLng clientLocation = new LatLng(
+                        getIntent().getDoubleExtra("client_lat", 0.0),
+                        getIntent().getDoubleExtra("client_lon", 0.0)
+                );
+
+                // Add markers for user and client
+                mMap.addMarker(new MarkerOptions().position(userLocation).title("Your Location"));
+                mMap.addMarker(new MarkerOptions().position(clientLocation).title("Client Location"));
+
+                // Move camera to user location
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 12));
+
+                // Draw a line between the two locations
+                mMap.addPolyline(new PolylineOptions()
+                        .add(userLocation, clientLocation)
+                        .width(10)
+                        .color(0xFF0000FF)); // Blue line
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            onMapReady(mMap);
+        }
     }
 }
-
 
 
 
@@ -221,12 +349,6 @@ public class MapFragment extends Fragment {
         return view;
     }
 }
-undefined
-
-undefined
-
-undefined
-
 
 
 
@@ -259,6 +381,12 @@ undefined
             android:layout_height="match_parent" />
     </RelativeLayout>
 
+    <include
+        android:id="@+id/app_bar_main"
+        layout="@layout/app_bar_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <!-- Navigation View -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
@@ -266,6 +394,7 @@ undefined
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
@@ -279,17 +408,16 @@ undefined
 
 // main\res\layout\activity_map.xml
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <WebView
-        android:id="@+id/map_webview"
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-</LinearLayout>
+</RelativeLayout>
 
 
 
@@ -376,13 +504,12 @@ undefined
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/client_list_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/client_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp" />
+        android:layout_height="match_parent" />
 </LinearLayout>
+
 
 
 
@@ -412,6 +539,62 @@ undefined
 
 
 
+// main\res\layout\item_client.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <ImageView
+        android:id="@+id/client_image"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginEnd="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_sample_location" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/client_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Client Name"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/client_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Brief description of the location"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/client_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_arrow" />
+</LinearLayout>
+
+
+
+
+
+
+
+
 // main\res\layout\nav_header_main.xml
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -427,13 +610,14 @@ undefined
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:contentDescription="@string/nav_header_desc"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        app:srcCompat="@mipmap/ic_launcher_round" />
+        android:src="@drawable/ic_redouane" />
+    
 
     <TextView
         android:layout_width="match_parent"
@@ -559,6 +743,7 @@ undefined
         android:name="com.example.tp3.MapFragment"
         android:label="Map"
         tools:layout="@layout/fragment_client_map" />
+
 </navigation>
 
 
@@ -594,9 +779,10 @@ undefined
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
-    <dimen name="nav_header_height">176dp</dimen>
+    <dimen name="nav_header_height">200dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 </resources>
+
 
 
 
@@ -619,8 +805,8 @@ undefined
     <string name="app_name">tp3</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">DADDIOUAMER Redouane</string>
+    <string name="nav_header_subtitle">redouane.daddiouamer@univ-constantine2.dz</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -628,13 +814,6 @@ undefined
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
 </resources>
-
-
-
-
-
-
-
 
 
 
@@ -646,6 +825,13 @@ undefined
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+
+    <!-- <application>
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="YOUR_API_KEY_HERE" />
+    </application> -->
 
 
     <application
