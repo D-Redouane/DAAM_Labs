@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+
 import java.util.List;
 
 public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientViewHolder> {
@@ -36,10 +38,20 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientView
         holder.name.setText(client.getName());
         holder.description.setText(client.getDescription());
         holder.image.setImageResource(client.getImageResId()); // Assuming image is from drawable
+        // holder.itemView.setOnClickListener(v -> {
+        //     Intent intent = new Intent(context, MapActivity.class);
+        //     intent.putExtra("client_lat", client.getLatitude());
+        //     intent.putExtra("client_lon", client.getLongitude());
+        //     context.startActivity(intent);
+        // });
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, MapActivity.class);
+            // Pass clicked client details
             intent.putExtra("client_lat", client.getLatitude());
             intent.putExtra("client_lon", client.getLongitude());
+            // Pass the entire client list as JSON
+            String clientJson = new Gson().toJson(clients); // Add Gson dependency
+            intent.putExtra("client_list", clientJson);
             context.startActivity(intent);
         });
     }

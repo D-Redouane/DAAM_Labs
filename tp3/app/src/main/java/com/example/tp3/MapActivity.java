@@ -14,10 +14,16 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -47,44 +53,41 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Request user location
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            return;
+        // Extract all clients from the intent
+        String clientJson = getIntent().getStringExtra("client_list");
+        Type listType = new TypeToken<List<Client>>() {}.getType();
+        List<Client> clients = new Gson().fromJson(clientJson, listType);
+
+        // Add markers for all clients
+        for (Client client : clients) {
+            LatLng clientPosition = new LatLng(client.getLatitude(), client.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(clientPosition).title(client.getName()));
         }
 
-        mMap.setMyLocationEnabled(true);
-        mMap.setOnMapLongClickListener(latLng -> {
-            // Add a marker at the clicked location
-            mMap.addMarker(new MarkerOptions().position(latLng).title("New Location"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
-        });
-        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-            if (location != null) {
-                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                LatLng clientLocation = new LatLng(
-                        getIntent().getDoubleExtra("client_lat", 0.0),
-                        getIntent().getDoubleExtra("client_lon", 0.0)
-                );
-
-                // Add markers for user and client
-                mMap.addMarker(new MarkerOptions().position(userLocation).title("Your Location"));
-                mMap.addMarker(new MarkerOptions().position(clientLocation).title("Client Location"));
-
-                // Move camera to user location
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 12));
-
-                // Draw a line between the two locations
-                mMap.addPolyline(new PolylineOptions()
-                        .add(userLocation, clientLocation)
-                        .width(10)
-                        .color(0xFF0000FF)); // Blue line
-            }
-        });
+        // Optionally, zoom to show all markers
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        for (Client client : clients) {
+            boundsBuilder.include(new LatLng(client.getLatitude(), client.getLongitude()));
+        }
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100));
     }
+
+    public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        double R = 6371; // Radius of Earth in km
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in km
+    }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             onMapReady(mMap);
         }

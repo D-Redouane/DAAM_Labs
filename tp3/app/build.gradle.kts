@@ -50,4 +50,5 @@ dependencies {
     implementation(libs.circleimageview)
     implementation(libs.google.maps)
     implementation(libs.google.location)
+    implementation(libs.gson)
 }
