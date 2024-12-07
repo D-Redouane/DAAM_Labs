@@ -55,21 +55,30 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         // Extract all clients from the intent
         String clientJson = getIntent().getStringExtra("client_list");
+        if (clientJson == null || clientJson.isEmpty()) {
+            return; // Exit if no clients are passed
+        }
+
         Type listType = new TypeToken<List<Client>>() {}.getType();
         List<Client> clients = new Gson().fromJson(clientJson, listType);
 
-        // Add markers for all clients
-        for (Client client : clients) {
-            LatLng clientPosition = new LatLng(client.getLatitude(), client.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(clientPosition).title(client.getName()));
-        }
-
-        // Optionally, zoom to show all markers
+        // Add markers for all clients and build bounds
         LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
         for (Client client : clients) {
-            boundsBuilder.include(new LatLng(client.getLatitude(), client.getLongitude()));
+            LatLng clientPosition = new LatLng(client.getLatitude(), client.getLongitude());
+            mMap.addMarker(new MarkerOptions()
+                    .position(clientPosition)
+                    .title(client.getName())
+                    .snippet(client.getDescription()));
+            boundsBuilder.include(clientPosition);
         }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100));
+
+        // Adjust camera to show all markers
+        int padding = 100; // Padding around the bounds in pixels
+        if (clients.size() > 0) {
+            LatLngBounds bounds = boundsBuilder.build();
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+        }
     }
 
     public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {

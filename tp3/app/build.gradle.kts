@@ -51,4 +51,6 @@ dependencies {
     implementation(libs.google.maps)
     implementation(libs.google.location)
     implementation(libs.gson)
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.lifecycle.livedata.ktx)
 }
