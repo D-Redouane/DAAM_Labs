@@ -13,6 +13,8 @@ navigationUi = "2.8.4"
 circleimageview = "3.1.0"
 gson = "2.10.1"
 androidx-lifecycle = "2.6.1"
+glide = "4.15.1"
+
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -29,6 +31,8 @@ circleimageview = { group = "de.hdodenhof", name = "circleimageview", version.re
 google-maps = "com.google.android.gms:play-services-maps:18.1.0"
 google-location = "com.google.android.gms:play-services-location:21.0.1"
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+glide = { group = "com.github.bumptech.glide", name = "glide", version = "4.15.1" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

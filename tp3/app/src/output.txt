@@ -1,33 +1,34 @@
+
 // main\java\com\example\tp3\Client.java
 package com.example.tp3;
 
 public class Client {
-    private final String name; // Client's name
-    private final String description; // Brief description of the location
-    private final int imageResId; // Resource ID for the client's image
-    private final double latitude; // Latitude of the client's location
-    private final double longitude; // Longitude of the client's location
+    private String name;
+    private String image;
+    private String category;
+    private double latitude;
+    private double longitude;
+    private String description;
 
-    // Constructor to initialize the Client object
-    public Client(String name, String description, int imageResId, double latitude, double longitude) {
+    public Client(String name, String image, String category, double latitude, double longitude, String description) {
         this.name = name;
-        this.description = description;
-        this.imageResId = imageResId;
+        this.image = image;
+        this.category = category;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.description = description;
     }
 
-    // Getters for accessing the properties
     public String getName() {
         return name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getImage() {
+        return image;
     }
 
-    public int getImageResId() {
-        return imageResId;
+    public String getCategory() {
+        return category;
     }
 
     public double getLatitude() {
@@ -36,6 +37,10 @@ public class Client {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }
 
@@ -56,75 +61,49 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.gson.Gson;
+import androidx.annotation.Nullable;
+import android.widget.ArrayAdapter;
 
 import java.util.List;
 
-public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientViewHolder> {
-
-    private final List<Client> clients;
+public class ClientAdapter extends ArrayAdapter<Client> {
     private final Context context;
+    private final List<Client> clients;
 
-    public ClientAdapter(Context context, List<Client> clients) {
-        this.context = context;
+    public ClientAdapter(@NonNull Context context, @NonNull List<Client> clients) {
+        super(context, R.layout.list_item_client, clients);
+        this.context = context; // Use only the passed-in context
         this.clients = clients;
     }
 
     @NonNull
     @Override
-    public ClientViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_client, parent, false);
-        return new ClientViewHolder(view);
-    }
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        if (convertView == null) {
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_item_client, parent, false);
+        }
 
-    @Override
-    public void onBindViewHolder(@NonNull ClientViewHolder holder, int position) {
         Client client = clients.get(position);
-        holder.name.setText(client.getName());
-        holder.description.setText(client.getDescription());
-        holder.image.setImageResource(client.getImageResId()); // Assuming image is from drawable
-        // holder.itemView.setOnClickListener(v -> {
-        //     Intent intent = new Intent(context, MapActivity.class);
-        //     intent.putExtra("client_lat", client.getLatitude());
-        //     intent.putExtra("client_lon", client.getLongitude());
-        //     context.startActivity(intent);
-        // });
-        holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, MapActivity.class);
-            // Pass clicked client details
-            intent.putExtra("client_lat", client.getLatitude());
-            intent.putExtra("client_lon", client.getLongitude());
-            // Pass the entire client list as JSON
-            String clientJson = new Gson().toJson(clients); // Add Gson dependency
-            intent.putExtra("client_list", clientJson);
+
+        TextView nameTextView = convertView.findViewById(R.id.clientName);
+        TextView categoryTextView = convertView.findViewById(R.id.clientCategory);
+        ImageView locationIcon = convertView.findViewById(R.id.locationIcon);
+
+        nameTextView.setText(client.getName());
+        categoryTextView.setText(client.getCategory());
+
+        // Handle click on the location icon
+        locationIcon.setOnClickListener(v -> {
+            Intent intent = new Intent(context, RouteActivity.class);
+            intent.putExtra("latitude", client.getLatitude());
+            intent.putExtra("longitude", client.getLongitude());
             context.startActivity(intent);
         });
-    }
 
-    @Override
-    public int getItemCount() {
-        return clients.size();
-    }
-
-    public static class ClientViewHolder extends RecyclerView.ViewHolder {
-        ImageView image;
-        TextView name, description;
-        ImageView icon;
-
-        public ClientViewHolder(@NonNull View itemView) {
-            super(itemView);
-            image = itemView.findViewById(R.id.client_image);
-            name = itemView.findViewById(R.id.client_name);
-            description = itemView.findViewById(R.id.client_description);
-            icon = itemView.findViewById(R.id.client_icon);
-        }
+        return convertView;
     }
 }
-
 
 
 
@@ -137,32 +116,36 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientView
 package com.example.tp3;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ClientListFragment extends Fragment {
+    private ArrayList<Client> clients;
+    private ListView listView;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_client_list, container, false);
+        listView = view.findViewById(R.id.listViewClients);
 
-        RecyclerView recyclerView = view.findViewById(R.id.client_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // Sample client data
+        clients = new ArrayList<>();
+        // clients.add(new Client("Université Constantine 2", "Université Constantine 2 Abdelhamid Mehri – Nouvelle ville Ali Mendjeli BP : 67A, Constantine – Algérie La Nouvelle Ville Ali Mendjeli, 25016", R.drawable.sample_image, 36.246579, 6.569953));
+        // clients.add(new Client("Université D'Avignon", "339 Chem. des Meinajaries, 84000 Avignon, France", R.drawable.sample_image, 43.910254, 4.888752));
+        
+        clients.add(new Client("Client 1", "image_url", "Category 1", 43.910254, 4.888752, "Description 1"));
+        clients.add(new Client("Client 2", "image_url", "Category 2", 36.246579, 6.569953, "Description 2"));
 
-        List<Client> clients = new ArrayList<>();
-        clients.add(new Client("Université Constantine 2", "Université Constantine 2 Abdelhamid Mehri – Nouvelle ville Ali Mendjeli BP : 67A, Constantine – Algérie La Nouvelle Ville Ali Mendjeli, 25016", R.drawable.sample_image, 36.246579, 6.569953));
-        clients.add(new Client("Université D'Avignon", "339 Chem. des Meinajaries, 84000 Avignon, France", R.drawable.sample_image, 43.910254, 4.888752)); // Example client
-
+        // Set up the adapter
         ClientAdapter adapter = new ClientAdapter(getContext(), clients);
-        recyclerView.setAdapter(adapter);
+        listView.setAdapter(adapter);
 
         return view;
     }
@@ -190,53 +173,58 @@ import com.example.tp3.databinding.ActivityMainBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import com.google.android.material.navigation.NavigationView;
+
+import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration mAppBarConfiguration;
-    private ActivityMainBinding binding;
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
 
-        FloatingActionButton add_icon = findViewById(R.id.add_icon);
-        add_icon.setOnClickListener(view -> {
-            // Start the MapActivity when the FAB is clicked
-            Intent intent = new Intent(MainActivity.this, MapActivity.class);
-            startActivity(intent);
+        // Set the navigation listener
+        navigationView.setNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.nav_clients:
+                    // Handle client list navigation
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.container, new ClientListFragment())
+                            .commit();
+                    break;
+
+                case R.id.nav_map:
+                    // Handle map navigation
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.container, new MapFragment())
+                            .commit();
+                    break;
+            }
+
+            // Close the drawer after navigation
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
         });
-
-        setSupportActionBar(binding.appBarMain.toolbar);
-
-        DrawerLayout drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
-
-        // mAppBarConfiguration = new AppBarConfiguration.Builder(
-        //         R.id.nav_client_list, R.id.nav_map)
-        //         .setOpenableLayout(drawer)
-        //         .build();
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-            R.id.nav_client_list, R.id.nav_map
-        ).setOpenableLayout(binding.drawerLayout).build();
-
-
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
     }
 }
-
 
 
 
@@ -302,21 +290,30 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         // Extract all clients from the intent
         String clientJson = getIntent().getStringExtra("client_list");
+        if (clientJson == null || clientJson.isEmpty()) {
+            return; // Exit if no clients are passed
+        }
+
         Type listType = new TypeToken<List<Client>>() {}.getType();
         List<Client> clients = new Gson().fromJson(clientJson, listType);
 
-        // Add markers for all clients
-        for (Client client : clients) {
-            LatLng clientPosition = new LatLng(client.getLatitude(), client.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(clientPosition).title(client.getName()));
-        }
-
-        // Optionally, zoom to show all markers
+        // Add markers for all clients and build bounds
         LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
         for (Client client : clients) {
-            boundsBuilder.include(new LatLng(client.getLatitude(), client.getLongitude()));
+            LatLng clientPosition = new LatLng(client.getLatitude(), client.getLongitude());
+            mMap.addMarker(new MarkerOptions()
+                    .position(clientPosition)
+                    .title(client.getName())
+                    .snippet(client.getDescription()));
+            boundsBuilder.include(clientPosition);
         }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100));
+
+        // Adjust camera to show all markers
+        int padding = 100; // Padding around the bounds in pixels
+        if (clients.size() > 0) {
+            LatLngBounds bounds = boundsBuilder.build();
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+        }
     }
 
     public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -362,23 +359,163 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 
-public class MapFragment extends Fragment {
+import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
-    @Nullable
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class MapFragment extends Fragment implements OnMapReadyCallback {
+    private GoogleMap googleMap;
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_client_map, container, false);
-
-        WebView webView = view.findViewById(R.id.webview);
-        webView.setWebViewClient(new WebViewClient());
-        webView.getSettings().setJavaScriptEnabled(true);
-
-        // Load a map URL (replace with your Google Maps URL)
-        webView.loadUrl("https://www.google.com/maps");
-
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
         return view;
     }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap map) {
+        googleMap = map;
+        LatLng location = new LatLng(36.246579, 6.569953); // Example coordinates
+        googleMap.addMarker(new MarkerOptions().position(location).title("Marker"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 10));
+    }
 }
+
+
+
+
+
+
+
+
+// main\java\com\example\tp3\RouteActivity.java
+package com.example.tp3;
+
+import android.os.Bundle;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class RouteActivity extends AppCompatActivity {
+//     @Override
+//     protected void onCreate(@Nullable Bundle savedInstanceState) {
+//         super.onCreate(savedInstanceState);
+//         setContentView(R.layout.activity_route);
+
+//         WebView webView = findViewById(R.id.webViewRoute);
+//         webView.getSettings().setJavaScriptEnabled(true);
+//         webView.setWebViewClient(new WebViewClient());
+
+//         // Get the latitude and longitude from the Intent
+//         double clientLatitude = getIntent().getDoubleExtra("latitude", 0.0);
+//         double clientLongitude = getIntent().getDoubleExtra("longitude", 0.0);
+
+//         // Replace with your current location or dynamically fetch the user's current coordinates
+//         double currentLatitude = 36.246453;
+//         double currentLongitude = 6.570260;
+
+//         // Build the Google Maps URL for directions
+//         String directionsUrl = String.format(
+//             "https://www.google.com/maps/dir/%f,%f/%f,%f",
+//             currentLatitude, currentLongitude, clientLatitude, clientLongitude
+//         );
+
+//         // Load the URL in the WebView
+//         webView.loadUrl(directionsUrl);
+//     }
+
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+     super.onCreate(savedInstanceState);
+     setContentView(R.layout.activity_route);
+
+     WebView webView = findViewById(R.id.webViewRoute);
+     webView.getSettings().setJavaScriptEnabled(true);
+     webView.setWebViewClient(new WebViewClient());
+
+     // Handle intent safely
+     double clientLatitude = getIntent().getDoubleExtra("latitude", 0.0);
+     double clientLongitude = getIntent().getDoubleExtra("longitude", 0.0);
+
+     if (clientLatitude == 0.0 || clientLongitude == 0.0) {
+          clientLatitude = 36.246453;
+          clientLongitude = 6.570260;
+     }
+
+     String directionsUrl = String.format(
+          "https://www.google.com/maps/dir/%f,%f/%f,%f",
+          36.246579, 6.569953, clientLatitude, clientLongitude
+     );
+
+     webView.loadUrl(directionsUrl);
+     }
+
+    
+}
+
+
+undefined
+
+undefined
+
+undefined
+
+
+
+
+
+
+
+
+
+
+
+// main\res\drawable\ic_menu_slideshow.xml
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M4,6H2v14c0,1.1 0.9,2 2,2h14v-2H4V6zm16,-4H8c-1.1,0 -2,0.9 -2,2v12c0,1.1 0.9,2 2,2h12c1.1,0 2,-0.9 2,-2V4c0,-1.1 -0.9,-2 -2,-2zm-8,12.5v-9l6,4.5 -6,4.5z" />
+</vector>
+
+
+
+
+
+
+
+
+// main\res\drawable\side_nav_bar.xml
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:angle="135"
+        android:centerColor="#009688"
+        android:endColor="#00695C"
+        android:startColor="#4DB6AC"
+        android:type="linear" />
+</shape>
+
+
 
 
 
@@ -390,41 +527,42 @@ public class MapFragment extends Fragment {
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:openDrawer="start"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
+    <!-- Main UI -->
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Add the WebView -->
-        <WebView
-            android:id="@+id/webView"
+        <!-- Fragment Container -->
+        <FrameLayout
+            android:id="@+id/container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
+            android:layout_height="match_parent"/>
 
-    <include
-        android:id="@+id/app_bar_main"
-        layout="@layout/app_bar_main"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    </LinearLayout>
 
-    <!-- Navigation View -->
+    <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer" />
-
+        android:background="#FFFFFF">
+        
+        <!-- Add your menu here if you have one -->
+        <menu>
+            <item
+                android:id="@+id/nav_clients"
+                android:title="Clients"/>
+            <item
+                android:id="@+id/nav_map"
+                android:title="Map"/>
+        </menu>
+    </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>
 
 
@@ -443,6 +581,25 @@ public class MapFragment extends Fragment {
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</RelativeLayout>
+
+
+
+
+
+
+
+
+// main\res\layout\activity_route.xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <WebView
+        android:id="@+id/webViewRoute"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </RelativeLayout>
@@ -527,16 +684,18 @@ public class MapFragment extends Fragment {
 
 // main\res\layout\fragment_client_list.xml
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/client_recycler_view"
+    <!-- ListView to show clients -->
+    <ListView
+        android:id="@+id/listViewClients"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp" />
 </LinearLayout>
 
 
@@ -560,6 +719,34 @@ public class MapFragment extends Fragment {
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>
+
+
+
+
+
+
+
+
+// main\res\layout\fragment_map.xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- WebView to show Google Maps -->
+    <WebView
+        android:id="@+id/webViewMap"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+     <fragment
+          android:id="@+id/map"
+          android:name="com.google.android.gms.maps.SupportMapFragment"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"/>
+
+
+</RelativeLayout>
 
 
 
@@ -624,15 +811,109 @@ public class MapFragment extends Fragment {
 
 
 
+// main\res\layout\list_item_client.xml
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/clientImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/ic_placeholder"
+        android:layout_marginEnd="10dp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/clientName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Client Name"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/clientCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/locationIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/ic_location"
+        android:contentDescription="Location Icon"
+        android:layout_gravity="center" />
+</LinearLayout>
+
+
+
+
+
+
+
+
+// main\res\layout\nav_header_main.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/nav_header_height"
+    android:background="@drawable/side_nav_bar"
+    android:gravity="bottom"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imageView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:contentDescription="@string/nav_header_desc"
+        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:src="@drawable/ic_redouane" />
+    
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:text="@string/nav_header_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/nav_header_subtitle" />
+</LinearLayout>
+
+
+
+
+
+
+
+
 
 // main\res\menu\activity_main_drawer.xml
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:showIn="navigation_view">
-
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_client_list"
+            android:id="@+id/nav_clients"
             android:icon="@drawable/ic_clients"
             android:title="Client List" />
         <item
@@ -640,6 +921,23 @@ public class MapFragment extends Fragment {
             android:icon="@drawable/ic_menu_map"
             android:title="Map" />
     </group>
+</menu>
+
+
+
+
+
+
+
+
+// main\res\menu\drawer_menu.xml
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_clients"
+        android:title="Clients" />
+    <item
+        android:id="@+id/nav_map"
+        android:title="Map" />
 </menu>
 
 
@@ -668,27 +966,284 @@ public class MapFragment extends Fragment {
 
 
 
+// main\res\mipmap-anydpi-v26\ic_launcher.xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_map_logo" />
+    <foreground android:drawable="@drawable/ic_map_logo" />
+    <monochrome android:drawable="@drawable/ic_map_logo" />
+</adaptive-icon>
+
+
+
+
+
+
+
+// main\res\mipmap-anydpi-v26\ic_launcher_round.xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_map_logo" />
+    <foreground android:drawable="@drawable/ic_map_logo" />
+    <monochrome android:drawable="@drawable/ic_map_logo" />
+</adaptive-icon>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // main\res\navigation\mobile_navigation.xml
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_client_list">
+    app:startDestination="@id/clientListFragment">
 
     <fragment
-        android:id="@+id/nav_client_list"
-        android:name="com.example.tp3.ClientListFragment"
-        android:label="Client List"
-        tools:layout="@layout/fragment_client_list" />
+        android:id="@+id/clientListFragment"
+        android:name="com.example.MainActivity$ClientListFragment"
+        android:label="Client List"/>
 
     <fragment
-        android:id="@+id/nav_map"
-        android:name="com.example.tp3.MapFragment"
-        android:label="Map"
-        tools:layout="@layout/fragment_client_map" />
-
+        android:id="@+id/mapFragment"
+        android:name="com.example.MainActivity$MapFragment"
+        android:label="Map"/>
 </navigation>
+
+
+
+
+
+
+
+
+
+
+// main\res\values\colors.xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>
+
+
+
+
+
+
+
+// main\res\values\dimens.xml
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="nav_header_vertical_spacing">8dp</dimen>
+    <dimen name="nav_header_height">200dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+</resources>
+
+
+
+
+
+
+
+
+// main\res\values\refs.xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources></resources>
+
+
+
+
+
+
+
+// main\res\values\strings.xml
+<resources>
+    <string name="app_name">tp3</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">DADDIOUAMER Redouane</string>
+    <string name="nav_header_subtitle">redouane.daddiouamer@univ-constantine2.dz</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+</resources>
+
+
+
+
+
+
+
+// main\res\values\themes.xml
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.Tp3" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Theme.Tp3.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Tp3.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.Tp3.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+</resources>
+
+
+
+
+
+
+
+
+
+// main\res\values-land\dimens.xml
+<resources>
+    <dimen name="fab_margin">48dp</dimen>
+</resources>
+
+
+
+
+
+
+
+
+
+// main\res\values-night\themes.xml
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.Tp3" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+    </style>
+</resources>
+
+
+
+
+
+
+
+
+
+// main\res\values-w1240dp\dimens.xml
+<resources>
+    <dimen name="fab_margin">200dp</dimen>
+</resources>
+
+
+
+
+
+
+
+
+
+// main\res\values-w600dp\dimens.xml
+<resources>
+    <dimen name="fab_margin">48dp</dimen>
+</resources>
+
+
+
+
+
+
+
+
+
+// main\res\xml\backup_rules.xml
+<?xml version="1.0" encoding="utf-8"?><!--
+   Sample backup rules file; uncomment and customize as necessary.
+   See https://developer.android.com/guide/topics/data/autobackup
+   for details.
+   Note: This file is ignored for devices older that API 31
+   See https://developer.android.com/about/versions/12/backup-restore
+-->
+<full-backup-content>
+    <!--
+   <include domain="sharedpref" path="."/>
+   <exclude domain="sharedpref" path="device.xml"/>
+-->
+</full-backup-content>
+
+
+
+
+
+
+
+// main\res\xml\data_extraction_rules.xml
+<?xml version="1.0" encoding="utf-8"?><!--
+   Sample data extraction rules file; uncomment and customize as necessary.
+   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
+   for details.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- TODO: Use <include> and <exclude> to control what is backed up.
+        <include .../>
+        <exclude .../>
+        -->
+    </cloud-backup>
+    <!--
+    <device-transfer>
+        <include .../>
+        <exclude .../>
+    </device-transfer>
+    -->
+</data-extraction-rules>undefinedundefinedundefinedundefinedundefinedundefinedundefinedundefinedundefinedundefinedundefinedundefinedundefinedundefinedundefinedundefined
+
+undefinedundefined
+
+
+
 
 
 
@@ -700,14 +1255,23 @@ public class MapFragment extends Fragment {
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/> -->
+
+    <!-- <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> -->
+
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+
     
     <!-- <application>
         <meta-data

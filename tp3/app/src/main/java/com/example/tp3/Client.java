@@ -1,39 +1,62 @@
 package com.example.tp3;
 
-public class Client {
-    private final String name; // Client's name
-    private final String description; // Brief description of the location
-    private final int imageResId; // Resource ID for the client's image
-    private final double latitude; // Latitude of the client's location
-    private final double longitude; // Longitude of the client's location
+import java.util.Date;
 
-    // Constructor to initialize the Client object
-    public Client(String name, String description, int imageResId, double latitude, double longitude) {
+public class Client {
+    private String name;
+    private int image;
+    private String category;
+    private String adresse;
+    private String coordinates;
+
+    // Constructeur
+    public Client(String name, int image, String category, String adresse, String coordinates) {
         this.name = name;
-        this.description = description;
-        this.imageResId = imageResId;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.image = image;
+        this.category = category;
+        this.adresse = adresse;
+        this.coordinates = coordinates;
+
     }
 
-    // Getters for accessing the properties
+    // Getters et Setters
     public String getName() {
         return name;
     }
 
-    public String getDescription() {
-        return description;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getImageResId() {
-        return imageResId;
+    public int getImage() {
+        return image;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public void setImage(int image) {
+        this.image = image;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getAdresse() {
+        return adresse;
+    }
+
+    public void setAdresse(String adresse) {
+        this.adresse = adresse;
+    }
+
+    public String getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(String coordinates) {
+        this.coordinates = coordinates;
     }
 }

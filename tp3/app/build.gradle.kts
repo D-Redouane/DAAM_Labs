@@ -53,4 +53,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.glide)
+
+
 }
