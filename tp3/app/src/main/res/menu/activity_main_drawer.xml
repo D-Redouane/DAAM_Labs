@@ -6,8 +6,13 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@drawable/ic_clients"
+            android:icon="@drawable/ic_challeng"
             android:title="@string/menu_challenges" />
+        <item
+            android:id="@+id/nav_mycomment"
+            android:icon="@drawable/ic_comment"
+            android:title="My Comments" />
+
         <!-- <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
@@ -17,4 +22,16 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_slideshow" /> -->
     </group>
+    <item android:title="Autres">
+        <menu>
+            <item
+                android:id="@+id/settings"
+                android:icon="@drawable/ic_setting"
+                android:title="Settings" />
+            <item
+                android:id="@+id/about"
+                android:icon="@drawable/ic_about"
+                android:title="About" />
+        </menu>
+    </item>
 </menu>

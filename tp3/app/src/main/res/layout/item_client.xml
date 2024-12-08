@@ -43,5 +43,5 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_marginStart="8dp"
-        android:src="@drawable/ic_sample_location" />
+        android:src="@drawable/ic_location" />
 </LinearLayout>

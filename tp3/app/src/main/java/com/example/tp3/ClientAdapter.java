@@ -35,17 +35,14 @@ public class ClientAdapter extends RecyclerView.Adapter<ClientAdapter.ClientView
         holder.clientName.setText(client.getName());
         holder.clientAddress.setText(client.getAdresse());
 
-        // Load the client's image using Glide
         Glide.with(holder.itemView.getContext())
-                .load(client.getImage()) // URL or local path
-                .placeholder(R.drawable.placeholder) // Default image
+                .load(client.getImage())
+                .placeholder(R.drawable.ic_location)
                 .into(holder.clientImage);
 
-        // Set click listener for the location icon
         holder.locationIcon.setOnClickListener(v -> {
-            // Open RouteActivity with the client's coordinates
             Intent intent = new Intent(holder.itemView.getContext(), RouteActivity.class);
-            intent.putExtra("client_coordinates", client.getCoordinates()); // Replace with actual field
+            intent.putExtra("client_coordinates", client.getCoordinates());
             holder.itemView.getContext().startActivity(intent);
         });
     }

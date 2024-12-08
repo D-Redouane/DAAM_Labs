@@ -27,11 +27,9 @@ public class HomeFragment extends Fragment {
         tabLayout = root.findViewById(R.id.tab_layout);
         viewPager = root.findViewById(R.id.view_pager);
 
-        // Configurer le ViewPager avec l'adaptateur
         FragmentAdapter adapter = new FragmentAdapter(requireActivity());
         viewPager.setAdapter(adapter);
 
-        // Connecter TabLayout et ViewPager
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             if (position == 0) {
                 tab.setText("POSITION MAP");

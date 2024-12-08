@@ -26,6 +26,6 @@ public class FragmentAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2; // Deux fragments : Position Map et List Challenge
+        return 2;
     }
 }
